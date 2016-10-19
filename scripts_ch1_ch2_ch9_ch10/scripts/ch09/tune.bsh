@@ -1,0 +1,18 @@
+#!/bin/bash
+# source oracle OS variables
+export ORACLE_SID=O1212
+export ORACLE_HOME=/u01/app/oracle/product/12.1.0.2/db_1
+export PATH=$ORACLE_HOME/bin:$PATH
+export LD_LIBRARY_PATH=/usr/lib:$ORACLE_HOME/lib
+#
+BOX=$(uname -a | awk '{print$2}')
+OUTFILE=$HOME/sqladvice.txt
+#
+sqlplus -s <<EOF
+/ as sysdba
+SPO $OUTFILE
+SET LINESIZE 80 PAGESIZE 0 LONG 100000
+SELECT DBMS_AUTO_SQLTUNE.REPORT_AUTO_TUNING_TASK FROM DUAL;
+EOF
+cat $OUTFILE | mailx -s "SQL Advice: $1 $BOX" dba@gmail.com 
+exit 0
